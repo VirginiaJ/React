@@ -11,6 +11,7 @@ import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
 import Select from "@material-ui/core/Select";
 import axios from "../../axios-table";
+import { IInputsData } from "./types";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -23,6 +24,13 @@ const useStyles = makeStyles((theme: Theme) =>
 
 export default function ProductModal(props: any) {
   const [typesData, setTypesData] = useState<string[]>([]);
+  const [inputsData, setInputsData] = useState<IInputsData>({
+    name: "",
+    ean: "",
+    type: "",
+    weight: "",
+    color: "",
+  });
   const classes = useStyles();
 
   useEffect(() => {
@@ -32,11 +40,41 @@ export default function ProductModal(props: any) {
   }, []);
 
   const meniuItems = typesData.map((type) => {
-      return (<MenuItem key={type} value={type}>{type}</MenuItem>)
+    return (
+      <MenuItem key={type} value={type}>
+        {type}
+      </MenuItem>
+    );
   });
 
   const handleClose = () => {
     props.callback(false);
+  };
+
+  const handleChange = (event: any) => {
+    const { target } = event;
+    const newInputsData = { ...inputsData };
+    let key: "name" | "ean" | "type" | "weight" | "color";
+    for (key in inputsData) {
+      if (target.id === key) {
+        newInputsData[key] = target.value;
+      }
+    }
+    setInputsData(newInputsData);
+  };
+
+  const handleSelectChange = (event: React.ChangeEvent<{ value: string }>) => {
+    setInputsData({
+      ...inputsData,
+      ["type"]: event.target.value,
+    });
+  };
+
+  const handleSave = () => {
+    axios.post("/products.json", inputsData).then((response) => {
+      const id = response.data.name;
+      props.callback(inputsData, id);
+    });
   };
 
   return (
@@ -55,6 +93,7 @@ export default function ProductModal(props: any) {
             label="Product name"
             type="text"
             fullWidth
+            onChange={(event: any) => handleChange(event)}
           />
           <TextField
             margin="dense"
@@ -62,14 +101,15 @@ export default function ProductModal(props: any) {
             label="EAN"
             type="number"
             fullWidth
+            onChange={(event: any) => handleChange(event)}
           />
           <FormControl className={classes.formControl}>
             <InputLabel id="product-type-label">Product type</InputLabel>
             <Select
               labelId="product-type-label"
               id="product-type"
-              //   value='Type'
-              //   onChange={handleChange}
+              value={inputsData["type"]}
+              onChange={handleSelectChange}
             >
               {meniuItems}
             </Select>
@@ -80,6 +120,7 @@ export default function ProductModal(props: any) {
             label="Weight"
             type="number"
             fullWidth
+            onChange={(event: any) => handleChange(event)}
           />
           <TextField
             margin="dense"
@@ -87,13 +128,14 @@ export default function ProductModal(props: any) {
             label="Color"
             type="text"
             fullWidth
+            onChange={(event: any) => handleChange(event)}
           />
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} color="primary">
             Cancel
           </Button>
-          <Button onClick={handleClose} color="primary">
+          <Button onClick={handleSave} color="primary">
             Save
           </Button>
         </DialogActions>

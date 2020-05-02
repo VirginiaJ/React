@@ -1,40 +1,23 @@
 import React, { useEffect, useState } from "react";
-import clsx from "clsx";
-import {
-  withStyles,
-  createStyles,
-  lighten,
-  makeStyles,
-  Theme,
-} from "@material-ui/core/styles";
+import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
 import TableContainer from "@material-ui/core/TableContainer";
-import TableHead from "@material-ui/core/TableHead";
 import TablePagination from "@material-ui/core/TablePagination";
 import TableRow from "@material-ui/core/TableRow";
-import TableSortLabel from "@material-ui/core/TableSortLabel";
-import Toolbar from "@material-ui/core/Toolbar";
-import Typography from "@material-ui/core/Typography";
 import Paper from "@material-ui/core/Paper";
 import Checkbox from "@material-ui/core/Checkbox";
 import IconButton from "@material-ui/core/IconButton";
 import Tooltip from "@material-ui/core/Tooltip";
-import DeleteIcon from "@material-ui/icons/Delete";
 import CreateIcon from "@material-ui/icons/Create";
 import SearchIcon from "@material-ui/icons/Search";
-import AddIcon from "@material-ui/icons/Add";
 import ProductModal from "../modal/modal-form";
 import axios from "../../axios-table";
-
-interface Data {
-  name: string;
-  ean: number;
-  type: string;
-  weight: number;
-  color: string;
-}
+import { Data } from "./types";
+import { IInputsData } from "../modal/types";
+import EnhancedTableHead from "./tableHead";
+import { EnhancedTableToolbar } from "./tableToolbar";
 
 function createData(
   name: string,
@@ -80,144 +63,6 @@ function stableSort<T>(array: T[], comparator: (a: T, b: T) => number) {
   return stabilizedThis.map((el) => el[0]);
 }
 
-interface HeadCell {
-  disablePadding: boolean;
-  id: keyof Data;
-  label: string;
-  numeric: boolean;
-}
-
-const headCells: HeadCell[] = [
-  { id: "name", numeric: false, disablePadding: true, label: "Product name" },
-  { id: "ean", numeric: true, disablePadding: false, label: "EAN" },
-  { id: "type", numeric: false, disablePadding: false, label: "Type" },
-  { id: "weight", numeric: true, disablePadding: false, label: "Weight (g)" },
-  { id: "color", numeric: false, disablePadding: false, label: "Color" },
-];
-
-interface EnhancedTableProps {
-  classes: ReturnType<typeof useStyles>;
-  numSelected: number;
-  onRequestSort: (
-    event: React.MouseEvent<unknown>,
-    property: keyof Data
-  ) => void;
-  onSelectAllClick: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  order: Order;
-  orderBy: string;
-  rowCount: number;
-}
-
-function EnhancedTableHead(props: EnhancedTableProps) {
-  const {
-    classes,
-    onSelectAllClick,
-    order,
-    orderBy,
-    numSelected,
-    rowCount,
-    onRequestSort,
-  } = props;
-  const createSortHandler = (property: keyof Data) => (
-    event: React.MouseEvent<unknown>
-  ) => {
-    onRequestSort(event, property);
-  };
-
-  return (
-    <TableHead>
-      <TableRow>
-        <StyledTableCell padding="checkbox">
-          <Checkbox
-            indeterminate={numSelected > 0 && numSelected < rowCount}
-            checked={rowCount > 0 && numSelected === rowCount}
-            onChange={onSelectAllClick}
-            inputProps={{ "aria-label": "select all products" }}
-          />
-        </StyledTableCell>
-        {headCells.map((headCell) => (
-          <StyledTableCell
-            key={headCell.id}
-            align={headCell.id === "name" ? "left" : "center"}
-            padding={headCell.disablePadding ? "none" : "default"}
-            sortDirection={orderBy === headCell.id ? order : false}
-          >
-            <TableSortLabel
-              active={orderBy === headCell.id}
-              direction={orderBy === headCell.id ? order : "asc"}
-              onClick={createSortHandler(headCell.id)}
-            >
-              {headCell.label}
-              {orderBy === headCell.id ? (
-                <span className={classes.visuallyHidden}>
-                  {order === "desc" ? "sorted descending" : "sorted ascending"}
-                </span>
-              ) : null}
-            </TableSortLabel>
-          </StyledTableCell>
-        ))}
-        <StyledTableCell align="center">Actions</StyledTableCell>
-      </TableRow>
-    </TableHead>
-  );
-}
-
-interface EnhancedTableToolbarProps {
-  numSelected: number;
-}
-
-const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
-  const classes = useToolbarStyles();
-  const { numSelected } = props;
-  const [openModal, setOpenModal] = useState<boolean>(false);
-
-  const handleModal = () => {
-    setOpenModal(!openModal);
-  };
-
-  return (
-    <Toolbar
-      className={clsx(classes.root, {
-        [classes.highlight]: numSelected > 0,
-      })}
-    >
-      {numSelected > 0 ? (
-        <Typography
-          className={classes.title}
-          color="inherit"
-          variant="subtitle1"
-          component="div"
-        >
-          {numSelected} selected
-        </Typography>
-      ) : (
-        <Typography
-          className={classes.title}
-          variant="h6"
-          id="tableTitle"
-          component="div"
-        >
-          Product List
-        </Typography>
-      )}
-      {numSelected > 0 ? (
-        <Tooltip title="Delete">
-          <IconButton aria-label="delete">
-            <DeleteIcon />
-          </IconButton>
-        </Tooltip>
-      ) : (
-        <Tooltip title="Add item">
-          <IconButton aria-label="add item" onClick={handleModal}>
-            <AddIcon />
-          </IconButton>
-        </Tooltip>
-      )}
-      <ProductModal isOpen={openModal} callback={handleModal} />
-    </Toolbar>
-  );
-};
-
 export default function TestTable() {
   const classes = useStyles();
   const [order, setOrder] = useState<Order>("asc");
@@ -226,26 +71,46 @@ export default function TestTable() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [productsData, setProductsData] = useState<any>({
-    products: {}
+    products: {},
   });
+  const [openModal, setOpenModal] = useState<boolean>(false);
 
   useEffect(() => {
     axios.get("/products.json").then((response) => {
-      setProductsData({products: response.data});
+      setProductsData({ products: response.data });
     });
   }, []);
 
-  const productsArray: { id: string; product: any; }[] = [];
+  const toolbarCallBack = () => {
+    setOpenModal(!openModal);
+  };
+
+  const productsArray: { id: string; product: any }[] = [];
   for (let key in productsData.products) {
     productsArray.push({
       id: key,
-      product: productsData.products[key]
+      product: productsData.products[key],
     });
   }
 
-  const rows: { name: string; ean: number; type: string; weight: number; color: string; }[] = [];
-  productsArray.map(item => {
-    rows.push(createData(item.product.name, item.product.ean, item.product.type, item.product.weight, item.product.color))
+  const rows: {
+    name: string;
+    ean: number;
+    type: string;
+    weight: number;
+    color: string;
+  }[] = [];
+
+  productsArray.map((item) => {
+    rows.push(
+      createData(
+        item.product.name,
+        item.product.ean,
+        item.product.type,
+        item.product.weight,
+        item.product.color
+      )
+    );
   });
 
   const handleRequestSort = (
@@ -255,6 +120,12 @@ export default function TestTable() {
     const isAsc = orderBy === property && order === "asc";
     setOrder(isAsc ? "desc" : "asc");
     setOrderBy(property);
+  };
+
+  const handleModal = (inputsData: IInputsData, id: string) => {
+    setOpenModal(!openModal);
+    const updatedProducts = { ...productsData.products, [id]: inputsData };
+    setProductsData({ products: updatedProducts });
   };
 
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -305,7 +176,10 @@ export default function TestTable() {
   return (
     <div className={classes.root}>
       <Paper className={classes.paper}>
-        <EnhancedTableToolbar numSelected={selected.length} />
+        <EnhancedTableToolbar
+          numSelected={selected.length}
+          modalCallBack={toolbarCallBack}
+        />
         <TableContainer>
           <Table
             className={classes.table}
@@ -388,22 +262,11 @@ export default function TestTable() {
           onChangePage={handleChangePage}
           onChangeRowsPerPage={handleChangeRowsPerPage}
         />
+        <ProductModal isOpen={openModal} callback={handleModal} />
       </Paper>
     </div>
   );
 }
-
-const StyledTableCell = withStyles((theme: Theme) =>
-  createStyles({
-    head: {
-      backgroundColor: "#bdbdbd",
-      color: theme.palette.common.white,
-    },
-    body: {
-      fontSize: 14,
-    },
-  })
-)(TableCell);
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -427,28 +290,6 @@ const useStyles = makeStyles((theme: Theme) =>
       position: "absolute",
       top: 20,
       width: 1,
-    },
-  })
-);
-
-const useToolbarStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      paddingLeft: theme.spacing(2),
-      paddingRight: theme.spacing(1),
-    },
-    highlight:
-      theme.palette.type === "light"
-        ? {
-            color: theme.palette.secondary.main,
-            backgroundColor: lighten(theme.palette.secondary.light, 0.85),
-          }
-        : {
-            color: theme.palette.text.primary,
-            backgroundColor: theme.palette.secondary.dark,
-          },
-    title: {
-      flex: "1 1 100%",
     },
   })
 );
