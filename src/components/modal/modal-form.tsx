@@ -108,7 +108,6 @@ export default function ProductModal(props: any) {
             <Select
               labelId="product-type-label"
               id="product-type"
-              value={inputsData["type"]}
               onChange={handleSelectChange}
             >
               {meniuItems}

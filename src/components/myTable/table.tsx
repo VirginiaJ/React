@@ -14,16 +14,16 @@ import CreateIcon from "@material-ui/icons/Create";
 import SearchIcon from "@material-ui/icons/Search";
 import ProductModal from "../modal/modal-form";
 import axios from "../../axios-table";
-import { Data } from "./types";
+import { Data, IProductsData } from "./types";
 import { IInputsData } from "../modal/types";
 import EnhancedTableHead from "./tableHead";
 import { EnhancedTableToolbar } from "./tableToolbar";
 
 function createData(
   name: string,
-  ean: number,
+  ean: string,
   type: string,
-  weight: number,
+  weight: string,
   color: string
 ): Data {
   return { name, ean, type, weight, color };
@@ -70,7 +70,7 @@ export default function TestTable() {
   const [selected, setSelected] = useState<string[]>([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [productsData, setProductsData] = useState<any>({
+  const [productsData, setProductsData] = useState<IProductsData>({
     products: {},
   });
   const [openModal, setOpenModal] = useState<boolean>(false);
@@ -80,10 +80,6 @@ export default function TestTable() {
       setProductsData({ products: response.data });
     });
   }, []);
-
-  const toolbarCallBack = () => {
-    setOpenModal(!openModal);
-  };
 
   const productsArray: { id: string; product: any }[] = [];
   for (let key in productsData.products) {
@@ -95,9 +91,9 @@ export default function TestTable() {
 
   const rows: {
     name: string;
-    ean: number;
+    ean: string;
     type: string;
-    weight: number;
+    weight: string;
     color: string;
   }[] = [];
 
@@ -112,6 +108,26 @@ export default function TestTable() {
       )
     );
   });
+
+  const toolbarCallBack = () => {
+    setOpenModal(!openModal);
+  };
+
+  const handleDelete = () => {
+    const itemsToDelete = [];
+    for (let i = 0; i < selected.length; i++) {
+      for (let key in productsData.products) {
+        if (selected[i] === productsData.products[key].ean) {
+          itemsToDelete.push(key);
+        }
+      }
+    }
+    for (let i = 0; i < itemsToDelete.length; i++) {
+      axios.delete("/products/" + itemsToDelete[i] + ".json");
+      delete productsData.products[itemsToDelete[i]];
+    }
+    setSelected([]);
+  };
 
   const handleRequestSort = (
     event: React.MouseEvent<unknown>,
@@ -130,19 +146,19 @@ export default function TestTable() {
 
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
-      const newSelecteds = rows.map((n) => n.name);
+      const newSelecteds = rows.map((n) => n.ean);
       setSelected(newSelecteds);
       return;
     }
     setSelected([]);
   };
 
-  const handleClick = (event: React.MouseEvent<unknown>, name: string) => {
-    const selectedIndex = selected.indexOf(name);
+  const handleClick = (event: React.MouseEvent<unknown>, ean: string) => {
+    const selectedIndex = selected.indexOf(ean);
     let newSelected: string[] = [];
 
     if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, name);
+      newSelected = newSelected.concat(selected, ean);
     } else if (selectedIndex === 0) {
       newSelected = newSelected.concat(selected.slice(1));
     } else if (selectedIndex === selected.length - 1) {
@@ -168,7 +184,7 @@ export default function TestTable() {
     setPage(0);
   };
 
-  const isSelected = (name: string) => selected.indexOf(name) !== -1;
+  const isSelected = (ean: string) => selected.indexOf(ean) !== -1;
 
   const emptyRows =
     rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
@@ -179,6 +195,7 @@ export default function TestTable() {
         <EnhancedTableToolbar
           numSelected={selected.length}
           modalCallBack={toolbarCallBack}
+          delete={handleDelete}
         />
         <TableContainer>
           <Table
@@ -199,13 +216,13 @@ export default function TestTable() {
               {stableSort(rows, getComparator(order, orderBy))
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row, index) => {
-                  const isItemSelected = isSelected(row.name);
+                  const isItemSelected = isSelected(row.ean);
                   const labelId = `enhanced-table-checkbox-${index}`;
 
                   return (
                     <TableRow
                       hover
-                      onClick={(event) => handleClick(event, row.name)}
+                      onClick={(event) => handleClick(event, row.ean)}
                       role="checkbox"
                       aria-checked={isItemSelected}
                       tabIndex={-1}

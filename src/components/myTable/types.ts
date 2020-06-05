@@ -1,8 +1,8 @@
 export interface Data {
   name: string;
-  ean: number;
+  ean: string;
   type: string;
-  weight: number;
+  weight: string;
   color: string;
 }
 
@@ -16,4 +16,17 @@ export interface HeadCell {
 export interface EnhancedTableToolbarProps {
   numSelected: number;
   modalCallBack: any;
+  delete: any;
+}
+
+export interface IProductsData {
+  products: {
+    [key: string] : {
+      name: string;
+      ean: string;
+      type: string;
+      weight: string;
+      color: string;
+    }
+  }
 }

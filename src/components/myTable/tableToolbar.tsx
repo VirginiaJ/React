@@ -22,6 +22,10 @@ export const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
     props.modalCallBack(true);
   };
 
+  const handleDelete = () => {
+    props.delete();
+  };
+
   return (
     <Toolbar
       className={clsx(classes.root, {
@@ -49,7 +53,7 @@ export const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
       )}
       {numSelected > 0 ? (
         <Tooltip title="Delete">
-          <IconButton aria-label="delete">
+          <IconButton aria-label="delete" onClick={handleDelete}>
             <DeleteIcon />
           </IconButton>
         </Tooltip>
