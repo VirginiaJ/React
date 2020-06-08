@@ -24,9 +24,10 @@ function createData(
   ean: string,
   type: string,
   weight: string,
-  color: string
+  color: string,
+  id: string
 ): Data {
-  return { name, ean, type, weight, color };
+  return { name, ean, type, weight, color, id };
 }
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
@@ -74,6 +75,7 @@ export default function TestTable() {
     products: {},
   });
   const [openModal, setOpenModal] = useState<boolean>(false);
+  const [editId, setEditId] = useState<string>("");
 
   useEffect(() => {
     axios.get("/products.json").then((response) => {
@@ -95,6 +97,7 @@ export default function TestTable() {
     type: string;
     weight: string;
     color: string;
+    id: string;
   }[] = [];
 
   productsArray.map((item) => {
@@ -104,7 +107,8 @@ export default function TestTable() {
         item.product.ean,
         item.product.type,
         item.product.weight,
-        item.product.color
+        item.product.color,
+        item.id
       )
     );
   });
@@ -129,6 +133,11 @@ export default function TestTable() {
     setSelected([]);
   };
 
+  const handleEdit = (id: string) => {
+    setEditId(id);
+    setOpenModal(true);
+  };
+
   const handleRequestSort = (
     event: React.MouseEvent<unknown>,
     property: keyof Data
@@ -143,6 +152,12 @@ export default function TestTable() {
     const updatedProducts = { ...productsData.products, [id]: inputsData };
     setProductsData({ products: updatedProducts });
   };
+
+  const handleEditData = (inputsData: IInputsData) => {
+    setOpenModal(!openModal);
+    const editedProducts = { ...productsData.products, [editId]: inputsData };
+    setProductsData({ products: editedProducts });
+  }
 
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
@@ -222,17 +237,17 @@ export default function TestTable() {
                   return (
                     <TableRow
                       hover
-                      onClick={(event) => handleClick(event, row.ean)}
                       role="checkbox"
                       aria-checked={isItemSelected}
                       tabIndex={-1}
-                      key={row.name}
+                      key={row.id}
                       selected={isItemSelected}
                     >
                       <TableCell padding="checkbox">
                         <Checkbox
                           checked={isItemSelected}
                           inputProps={{ "aria-labelledby": labelId }}
+                          onClick={(event) => handleClick(event, row.ean)}
                         />
                       </TableCell>
                       <TableCell
@@ -254,7 +269,10 @@ export default function TestTable() {
                           </IconButton>
                         </Tooltip>
                         <Tooltip title="Edit item">
-                          <IconButton aria-label="edit item">
+                          <IconButton
+                            aria-label="edit item"
+                            onClick={() => handleEdit(row.id)}
+                          >
                             <CreateIcon />
                           </IconButton>
                         </Tooltip>
@@ -279,7 +297,13 @@ export default function TestTable() {
           onChangePage={handleChangePage}
           onChangeRowsPerPage={handleChangeRowsPerPage}
         />
-        <ProductModal isOpen={openModal} callback={handleModal} />
+        <ProductModal
+          isOpen={openModal}
+          callback={handleModal}
+          editCallBack={handleEditData}
+          itemToEdit={productsData.products[editId]}
+          itemToEditId={editId}
+        />
       </Paper>
     </div>
   );

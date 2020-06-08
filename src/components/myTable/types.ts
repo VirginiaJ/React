@@ -4,6 +4,7 @@ export interface Data {
   type: string;
   weight: string;
   color: string;
+  id: string;
 }
 
 export interface HeadCell {

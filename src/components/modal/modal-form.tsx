@@ -39,6 +39,12 @@ export default function ProductModal(props: any) {
     });
   }, []);
 
+  useEffect(() => {
+    if (props.itemToEdit) {
+      setInputsData({ ...props.itemToEdit });
+    }
+  }, [props.itemToEdit]);
+
   const meniuItems = typesData.map((type) => {
     return (
       <MenuItem key={type} value={type}>
@@ -71,10 +77,16 @@ export default function ProductModal(props: any) {
   };
 
   const handleSave = () => {
-    axios.post("/products.json", inputsData).then((response) => {
-      const id = response.data.name;
-      props.callback(inputsData, id);
-    });
+    if (props.itemToEdit) {
+      axios
+        .put("/products/" + props.itemToEditId + ".json", inputsData)
+        .then((response) => props.editCallBack(response.data));
+    } else {
+      axios.post("/products.json", inputsData).then((response) => {
+        const id = response.data.name;
+        props.callback(inputsData, id);
+      });
+    }
   };
 
   return (
@@ -84,7 +96,9 @@ export default function ProductModal(props: any) {
         onClose={handleClose}
         aria-labelledby="product-modal"
       >
-        <DialogTitle id="product-modal">Fill required data</DialogTitle>
+        <DialogTitle id="product-modal">
+          {props.itemToEdit ? "Edit data" : "Fill required data"}
+        </DialogTitle>
         <DialogContent>
           <TextField
             autoFocus
@@ -93,6 +107,7 @@ export default function ProductModal(props: any) {
             label="Product name"
             type="text"
             fullWidth
+            defaultValue={props.itemToEdit ? props.itemToEdit.name : ""}
             onChange={(event: any) => handleChange(event)}
           />
           <TextField
@@ -101,6 +116,7 @@ export default function ProductModal(props: any) {
             label="EAN"
             type="number"
             fullWidth
+            defaultValue={props.itemToEdit ? props.itemToEdit.ean : ""}
             onChange={(event: any) => handleChange(event)}
           />
           <FormControl className={classes.formControl}>
@@ -108,6 +124,7 @@ export default function ProductModal(props: any) {
             <Select
               labelId="product-type-label"
               id="product-type"
+              defaultValue={props.itemToEdit ? props.itemToEdit.type : ""}
               onChange={handleSelectChange}
             >
               {meniuItems}
@@ -119,6 +136,7 @@ export default function ProductModal(props: any) {
             label="Weight"
             type="number"
             fullWidth
+            defaultValue={props.itemToEdit ? props.itemToEdit.weight : ""}
             onChange={(event: any) => handleChange(event)}
           />
           <TextField
@@ -127,6 +145,7 @@ export default function ProductModal(props: any) {
             label="Color"
             type="text"
             fullWidth
+            defaultValue={props.itemToEdit ? props.itemToEdit.color : ""}
             onChange={(event: any) => handleChange(event)}
           />
         </DialogContent>
