@@ -84,7 +84,7 @@ export default function ProductModal(props: any) {
     } else {
       axios.post("/products.json", inputsData).then((response) => {
         const id = response.data.name;
-        props.callback(inputsData, id);
+        props.newCallBack(inputsData, id);
       });
     }
   };

@@ -147,7 +147,7 @@ export default function TestTable() {
     setOrderBy(property);
   };
 
-  const handleModal = (inputsData: IInputsData, id: string) => {
+  const handleNewData = (inputsData: IInputsData, id: string) => {
     setOpenModal(!openModal);
     const updatedProducts = { ...productsData.products, [id]: inputsData };
     setProductsData({ products: updatedProducts });
@@ -299,7 +299,7 @@ export default function TestTable() {
         />
         <ProductModal
           isOpen={openModal}
-          callback={handleModal}
+          newCallBack={handleNewData}
           editCallBack={handleEditData}
           itemToEdit={productsData.products[editId]}
           itemToEditId={editId}
