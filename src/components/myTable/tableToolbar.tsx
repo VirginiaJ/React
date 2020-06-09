@@ -22,10 +22,6 @@ export const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
     props.modalCallBack(true);
   };
 
-  // const handleDelete = () => {
-  //   props.delete();
-  // };
-
   return (
     <Toolbar
       className={clsx(classes.root, {
