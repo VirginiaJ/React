@@ -64,7 +64,7 @@ function stableSort<T>(array: T[], comparator: (a: T, b: T) => number) {
   return stabilizedThis.map((el) => el[0]);
 }
 
-export default function TestTable() {
+export default function ProductTable() {
   const classes = useStyles();
   const [order, setOrder] = useState<Order>("asc");
   const [orderBy, setOrderBy] = useState<keyof Data>("ean");
