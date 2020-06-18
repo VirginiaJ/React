@@ -54,7 +54,7 @@ export default function ProductModal(props: any) {
   });
 
   const handleClose = () => {
-    props.callback(false);
+    props.modalCallBack(false);
   };
 
   const handleChange = (event: any) => {
@@ -69,7 +69,7 @@ export default function ProductModal(props: any) {
     setInputsData(newInputsData);
   };
 
-  const handleSelectChange = (event: React.ChangeEvent<{ value: string }>) => {
+  const handleSelectChange = (event: React.ChangeEvent<{ value: any }>) => {
     setInputsData({
       ...inputsData,
       ["type"]: event.target.value,

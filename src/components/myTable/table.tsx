@@ -113,8 +113,9 @@ export default function TestTable() {
     );
   });
 
-  const toolbarCallBack = () => {
+  const handleModal = () => {
     setOpenModal(!openModal);
+    setEditId("");
   };
 
   const handleDelete = () => {
@@ -157,6 +158,7 @@ export default function TestTable() {
     setOpenModal(!openModal);
     const editedProducts = { ...productsData.products, [editId]: inputsData };
     setProductsData({ products: editedProducts });
+    setEditId("");
   }
 
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -209,7 +211,7 @@ export default function TestTable() {
       <Paper className={classes.paper}>
         <EnhancedTableToolbar
           numSelected={selected.length}
-          modalCallBack={toolbarCallBack}
+          modalCallBack={handleModal}
           delete={handleDelete}
         />
         <TableContainer>
@@ -299,6 +301,7 @@ export default function TestTable() {
         />
         <ProductModal
           isOpen={openModal}
+          modalCallBack={handleModal}
           newCallBack={handleNewData}
           editCallBack={handleEditData}
           itemToEdit={productsData.products[editId]}
