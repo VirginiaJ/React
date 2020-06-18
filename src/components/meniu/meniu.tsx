@@ -1,16 +1,17 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { routes } from "../../routes";
+import "./meniu.css";
 
 export default function Meniu() {
   return (
     <nav>
       <ul>
         <li>
-          <Link to={routes.home}>Home</Link>
+          <NavLink to={routes.home} exact>Home</NavLink>
         </li>
         <li>
-          <Link to={routes.products}>Product List</Link>
+          <NavLink to={routes.products}>Product List</NavLink>
         </li>
       </ul>
     </nav>
