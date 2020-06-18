@@ -1,4 +1,5 @@
 export const routes = {
     home: '/',
-    products: '/product-list'
+    products: '/product-list',
+    product: '/product/:id'
 }

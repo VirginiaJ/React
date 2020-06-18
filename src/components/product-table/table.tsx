@@ -18,6 +18,7 @@ import { Data, IProductsData } from "./types";
 import { IInputsData } from "../modal/types";
 import EnhancedTableHead from "./tableHead";
 import { EnhancedTableToolbar } from "./tableToolbar";
+import { Link } from "react-router-dom";
 
 function createData(
   name: string,
@@ -159,7 +160,7 @@ export default function ProductTable() {
     const editedProducts = { ...productsData.products, [editId]: inputsData };
     setProductsData({ products: editedProducts });
     setEditId("");
-  }
+  };
 
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
@@ -266,9 +267,11 @@ export default function ProductTable() {
                       <TableCell align="center">{row.color}</TableCell>
                       <TableCell align="center">
                         <Tooltip title="Preview item">
-                          <IconButton aria-label="preview item">
-                            <SearchIcon />
-                          </IconButton>
+                          <Link to={"/product/" + row.id}>
+                            <IconButton aria-label="preview item">
+                              <SearchIcon />
+                            </IconButton>
+                          </Link>
                         </Tooltip>
                         <Tooltip title="Edit item">
                           <IconButton
