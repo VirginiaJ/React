@@ -14,7 +14,7 @@ import CreateIcon from "@material-ui/icons/Create";
 import SearchIcon from "@material-ui/icons/Search";
 import ProductModal from "../modal/modal-form";
 import axios from "../../axios-table";
-import { Data, IProductsData } from "./types";
+import { Data, IProductsData, IProductData } from "./types";
 import { IInputsData } from "../modal/types";
 import EnhancedTableHead from "./tableHead";
 import { EnhancedTableToolbar } from "./tableToolbar";
@@ -84,7 +84,7 @@ export default function ProductTable() {
     });
   }, []);
 
-  const productsArray: { id: string; product: any }[] = [];
+  const productsArray: { id: string; product: IProductData }[] = [];
   for (let key in productsData.products) {
     productsArray.push({
       id: key,
@@ -120,17 +120,9 @@ export default function ProductTable() {
   };
 
   const handleDelete = () => {
-    const itemsToDelete = [];
     for (let i = 0; i < selected.length; i++) {
-      for (let key in productsData.products) {
-        if (selected[i] === productsData.products[key].ean) {
-          itemsToDelete.push(key);
-        }
-      }
-    }
-    for (let i = 0; i < itemsToDelete.length; i++) {
-      axios.delete("/products/" + itemsToDelete[i] + ".json");
-      delete productsData.products[itemsToDelete[i]];
+      axios.delete("/products/" + selected[i] + ".json");
+      delete productsData.products[selected[i]];
     }
     setSelected([]);
   };
@@ -164,19 +156,19 @@ export default function ProductTable() {
 
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
-      const newSelecteds = rows.map((n) => n.ean);
+      const newSelecteds = rows.map((n) => n.id);
       setSelected(newSelecteds);
       return;
     }
     setSelected([]);
   };
 
-  const handleClick = (event: React.MouseEvent<unknown>, ean: string) => {
-    const selectedIndex = selected.indexOf(ean);
+  const handleClick = (event: React.MouseEvent<unknown>, id: string) => {
+    const selectedIndex = selected.indexOf(id);
     let newSelected: string[] = [];
 
     if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, ean);
+      newSelected = newSelected.concat(selected, id);
     } else if (selectedIndex === 0) {
       newSelected = newSelected.concat(selected.slice(1));
     } else if (selectedIndex === selected.length - 1) {
@@ -202,7 +194,7 @@ export default function ProductTable() {
     setPage(0);
   };
 
-  const isSelected = (ean: string) => selected.indexOf(ean) !== -1;
+  const isSelected = (id: string) => selected.indexOf(id) !== -1;
 
   const emptyRows =
     rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
@@ -234,7 +226,7 @@ export default function ProductTable() {
               {stableSort(rows, getComparator(order, orderBy))
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row, index) => {
-                  const isItemSelected = isSelected(row.ean);
+                  const isItemSelected = isSelected(row.id);
                   const labelId = `enhanced-table-checkbox-${index}`;
 
                   return (
@@ -250,7 +242,7 @@ export default function ProductTable() {
                         <Checkbox
                           checked={isItemSelected}
                           inputProps={{ "aria-labelledby": labelId }}
-                          onClick={(event) => handleClick(event, row.ean)}
+                          onClick={(event) => handleClick(event, row.id)}
                         />
                       </TableCell>
                       <TableCell

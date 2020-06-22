@@ -1,5 +1,7 @@
 import React from "react";
+import { RouteComponentProps } from "react-router-dom";
 
-export default function Product(props: any) {
-  return <p>Product info {props.match.params.id}</p>;
+type TParams = { id: string };
+export default function Product({ match }: RouteComponentProps<TParams>) {
+  return <p>Product info {match.params.id}</p>;
 }

@@ -22,12 +22,20 @@ export interface EnhancedTableToolbarProps {
 
 export interface IProductsData {
   products: {
-    [key: string] : {
+    [key: string]: {
       name: string;
       ean: string;
       type: string;
       weight: string;
       color: string;
-    }
-  }
+    };
+  };
+}
+
+export interface IProductData {
+  name: string;
+  ean: string;
+  type: string;
+  weight: string;
+  color: string;
 }
